@@ -1,0 +1,6 @@
+__pycache__/
+data/
+test_frame.jpg
+*.pt
+.env
+outputs/
