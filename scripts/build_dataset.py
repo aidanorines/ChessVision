@@ -2,6 +2,7 @@
 
 Pipeline step: dataset building (between data collection and training). For every photo in data/raw/<game>/:
 warp the 4K frame once, cut the 64 lean-aware crops (board.py), and label each crop from the FEN.
+Each game uses its own data/raw/<game>/calibration.json (saved by capture.py), not the current global one.
 
 Output (torchvision ImageFolder layout, one folder per class):
   data/crops/train/<class>/<game>_<photo>_<square>.jpg
@@ -53,13 +54,14 @@ def split_games():
 def main():
     if OUT.exists():
         raise SystemExit(f"{OUT} already exists. Delete it to rebuild; nothing is overwritten.")
-    H, foot, lean = geo.load_calibration()
-    boxes = geo.crop_boxes(foot, lean)   # same 64 boxes for every photo: the camera is fixed
     splits = split_games()
 
     for split, games in splits.items():
         counts = Counter()
         for game in games:
+            # each game is cropped with the calibration it was shot with (the camera may have moved between sessions)
+            H, foot, lean = geo.load_calibration(geo.game_calibration_path(RAW / game))
+            boxes = geo.crop_boxes(foot, lean)   # same 64 boxes for every photo of this game
             for row in csv.DictReader(open(RAW / game / "labels.csv")):
                 frame = cv2.imread(str(RAW / game / row["file"]))
                 position = chess.Board(row["fen"])

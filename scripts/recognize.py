@@ -83,10 +83,13 @@ def to_fen(names, labels):
     return position.board_fen()
 
 
-def evaluate(game_dirs, model, classes, H, boxes):
-    """Whole-board accuracy with and without the king rule on labeled games (data/raw/<game>/labels.csv)."""
+def evaluate(game_dirs, model, classes):
+    """Whole-board accuracy with and without the king rule on labeled games (data/raw/<game>/labels.csv).
+    Each game is warped and cropped with its own saved calibration, so old games still score right after recalibrating."""
     total = [0, 0, 0]   # photos, correct without rule, correct with rule
     for d in game_dirs:
+        H, foot, lean = geo.load_calibration(geo.game_calibration_path(d))
+        boxes = geo.crop_boxes(foot, lean)
         n = raw_ok = fixed_ok = 0
         for row in csv.DictReader(open(d / "labels.csv")):
             names, logits = square_logits(cv2.imread(str(d / row["file"])), model, H, boxes)
@@ -129,11 +132,11 @@ def main():
 
     _self_test()
     model, classes = load_model(args.model)
-    H, foot, lean = geo.load_calibration()
-    boxes = geo.crop_boxes(foot, lean)   # same 64 boxes for every frame: the camera is fixed
+    H, foot, lean = geo.load_calibration()   # current camera position, for new photos
+    boxes = geo.crop_boxes(foot, lean)       # same 64 boxes for every frame: the camera is fixed
 
     if args.eval:
-        evaluate(args.eval, model, classes, H, boxes)
+        evaluate(args.eval, model, classes)
     for path in args.images:
         frame = cv2.imread(str(path))
         if frame is None:

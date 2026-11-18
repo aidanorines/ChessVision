@@ -75,6 +75,15 @@ def load_calibration(path=CALIB_PATH):
     return homography(calib["corners"]), foot, calib["lean"]
 
 
+def game_calibration_path(game_dir):
+    """The calibration a game was shot with: data/raw/<game>/calibration.json, copied there at capture time.
+    Each game keeps its own, so recalibrating (camera moved) never changes how older photos are cropped."""
+    path = game_dir / "calibration.json"
+    if not path.exists():
+        raise RuntimeError(f"{path} is missing: every game folder needs the calibration it was shot with")
+    return path
+
+
 def crop_boxes(foot, lean):
     """One square box (name, x, y, side) per board square, in FEN order: a8, b8 ... h8, a7 ... h1.
     Each box covers the base (radius BASE_R around the square center) and the tallest piece's leaning top."""

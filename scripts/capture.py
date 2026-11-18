@@ -3,6 +3,7 @@
 Pipeline step: data collection. Output for each game:
   data/raw/<game>/0001.jpg, 0002.jpg ...   raw 4K frames (crops can be rebuilt from these any time)
   data/raw/<game>/labels.csv               file, fen, moves: the label for each photo
+  data/raw/<game>/calibration.json         copy of the calibration this game was shot with
 
 Two modes:
   random (train/val): from the starting position, play 1-3 random legal moves per photo. Random play
@@ -18,6 +19,7 @@ Keys in the preview window:  r = retake the last photo (fix the board, press the
 import argparse
 import csv
 import random
+import shutil
 from itertools import islice
 
 import chess
@@ -92,6 +94,7 @@ def main():
     grab_frame(cap)                 # warm up and confirm 4K before anything is written
     presses = start_remote()
     out.mkdir(parents=True)
+    shutil.copy(geo.CALIB_PATH, out / "calibration.json")   # this game's calibration, used when building its crops
     next_moves = make_stepper(args)
     pos = chess.Board()
     steps = []   # one entry per step: (plies pushed, SAN list, squares to highlight). Last one = waiting for a photo.

@@ -142,11 +142,28 @@ def correct(result, i, classes, next_guess):
     result["notes"] = (result["notes"] + [f"corrected {result['names'][i]}: {old} -> {new}"])[-6:]   # panel fits ~6 notes
 
 
+def live_folder():
+    """Today's live_<date> folder, holding a copy of the current calibration. If the camera was
+    recalibrated since that folder started, use live_<date>_2, _3 ... so one folder never mixes calibrations."""
+    current = geo.CALIB_PATH.read_bytes()
+    base = f"live_{datetime.date.today().isoformat()}"
+    n = 1
+    while True:
+        folder = ROOT / "data" / "raw" / (base if n == 1 else f"{base}_{n}")
+        calib = folder / "calibration.json"
+        if not calib.exists():
+            folder.mkdir(parents=True, exist_ok=True)
+            calib.write_bytes(current)
+            return folder
+        if calib.read_bytes() == current:
+            return folder
+        n += 1
+
+
 def save_correction(result):
     """Append the frame + corrected FEN to data/raw/live_<date>/, the layout capture.py writes,
     so build_dataset.py turns it into training crops. Returns the saved path for the panel."""
-    folder = ROOT / "data" / "raw" / f"live_{datetime.date.today().isoformat()}"
-    folder.mkdir(parents=True, exist_ok=True)
+    folder = live_folder()
     labels_csv = folder / "labels.csv"
     new_file = not labels_csv.exists()
     name = f"{len(list(folder.glob('*.jpg'))) + 1:04d}.jpg"

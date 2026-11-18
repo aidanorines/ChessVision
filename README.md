@@ -55,7 +55,7 @@ Each script's docstring explains it in more detail.
 | # | Command | Input | Output |
 |---|---|---|---|
 | 1 | `python scripts/calibrate.py` | live frame of the board in the **starting position**; you click a1, h1, h8, a8, then the tops of the kings on e1 and e8 | `calibration.json` (corners, foot point, lean) |
-| 2 | `python scripts/capture.py g01` (random game)<br>`python scripts/capture.py test01 --pgn pgn/test01.pgn` (real game) | live frames. The script shows the position to set up; a press of the Bluetooth remote saves the photo | `data/raw/<game>/0001.jpg ...` (raw 4K) + `labels.csv` (file, FEN) |
+| 2 | `python scripts/capture.py g01` (random game)<br>`python scripts/capture.py test01 --pgn pgn/test01.pgn` (real game) | live frames. The script shows the position to set up; a press of the Bluetooth remote saves the photo | `data/raw/<game>/0001.jpg ...` (raw 4K) + `labels.csv` (file, FEN) + `calibration.json` (the calibration this game was shot with; `build_dataset.py` and `recognize.py --eval` crop each game with its own, so recalibrating never breaks older data) |
 | 3 | `python scripts/build_dataset.py` | `data/raw/` | `data/crops/{train,val,test}/<class>/<game>_<photo>_<square>.jpg` (ImageFolder layout) + class counts |
 | 4 | `notebooks/train_colab.ipynb` on Colab (upload `crops.zip` and `train.py` to `MyDrive/chessvision/`) | `crops.zip` | `model.pt` (best validation epoch), `train_log.csv`, `training_curves.png`, `confusion_matrix.png`, `test_mistakes.png/.csv` |
 | 5 | `python scripts/recognize.py photo.jpg`<br>`python scripts/recognize.py --eval data/raw/test01 data/raw/test02` | a 4K frame, or labeled game folders | the FEN and the board as text; with `--eval`, whole-board accuracy with and without the king rule |
