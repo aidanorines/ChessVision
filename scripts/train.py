@@ -8,7 +8,7 @@ Output (in --out, default outputs/):
 Decisions (PROJECT_LOG.md): fine-tune ALL layers with a small learning rate; light augmentation
 (color jitter + small shifts, no flips/rotations because lean and shadows are fixed by the camera);
 10 epochs, Adam lr 1e-4; keep the epoch with the best validation accuracy.
-The test split is NOT touched here; only evaluate.py looks at it, once, at the end.
+The test split is NOT touched here; only the test cells in notebooks/train_colab.ipynb look at it, once, at the end.
 
 Usage:
   Colab (GPU):  python train.py --data /content/data/crops --out /content/drive/MyDrive/chess_vision/outputs
