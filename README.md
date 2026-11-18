@@ -122,7 +122,7 @@ chess_vision/
 ```
 
 **Not in git** (see `.gitignore`):
-- `data/`: about 3 GB of raw 4K frames plus 25,920 crops
+- `data/`: about 1 GB in total. Raw 4K frames take 625 MB and the 25,920 crops take 384 MB
 - `*.pt`: the 45 MB trained model
 - `outputs/`
 
