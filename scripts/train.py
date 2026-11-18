@@ -40,9 +40,10 @@ TRAIN_TF = transforms.Compose([
 EVAL_TF = transforms.Compose([transforms.ToTensor(), transforms.Normalize(MEAN, STD)])
 
 
-def build_model(n_classes):
-    """ResNet18 with ImageNet weights; the 1000-class final layer is replaced by one for our classes."""
-    model = models.resnet18(weights=models.ResNet18_Weights.IMAGENET1K_V1)
+def build_model(n_classes, pretrained=True):
+    """ResNet18 with ImageNet weights; the 1000-class final layer is replaced by one for our classes.
+    pretrained=False skips the ImageNet download when the trained weights are loaded from model.pt anyway."""
+    model = models.resnet18(weights=models.ResNet18_Weights.IMAGENET1K_V1 if pretrained else None)
     model.fc = nn.Linear(model.fc.in_features, n_classes)   # 512 features -> 13 scores
     return model
 
