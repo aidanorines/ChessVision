@@ -12,7 +12,7 @@ The file name keeps game, photo and square, so any misclassified crop can be tra
 Split is BY GAME: photos one move apart are near-duplicates, so the same game never appears in two splits.
   test  = games named test* (real games replayed from PGN)
   val   = VAL_GAMES random games, drawn with a fixed seed (reproducible, chosen before seeing any results)
-  train = the remaining random games
+  train = the remaining random games, plus live_* games (corrections saved by demo.py)
 
 Usage (from chess_vision/):  python scripts/build_dataset.py
 Delete data/crops first to rebuild (e.g. after shooting the test games or changing the crop method).
@@ -44,9 +44,10 @@ def class_name(piece):
 def split_games():
     games = sorted(p.name for p in RAW.iterdir() if p.is_dir())
     test = [g for g in games if g.startswith("test")]
-    rest = [g for g in games if g not in test]
-    val = sorted(random.Random(SEED).sample(rest, VAL_GAMES))
-    return {"train": [g for g in rest if g not in val], "val": val, "test": test}
+    live = [g for g in games if g.startswith("live")]   # corrections saved by demo.py: always train
+    rest = [g for g in games if g not in test and g not in live]
+    val = sorted(random.Random(SEED).sample(rest, VAL_GAMES))   # drawn from the original games only, so it never changes
+    return {"train": [g for g in rest if g not in val] + live, "val": val, "test": test}
 
 
 def main():
