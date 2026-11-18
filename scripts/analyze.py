@@ -67,7 +67,8 @@ def analyze(engine, placement, depth=DEPTH):
         if status & chess.STATUS_OPPOSITE_CHECK:
             result[side] = f"impossible: {other} is in check, so it can't be {side} to move"
         elif status != chess.STATUS_VALID:
-            result[side] = f"impossible position: {status!r}"
+            reasons = [f.name.lower().replace("_", " ") for f in chess.Status if f and f in status]   # e.g. "pawns on backrank"
+            result[side] = "impossible: " + ", ".join(reasons)
         elif board.is_checkmate():
             result[side] = f"{side} is checkmated"
         elif board.is_stalemate():
