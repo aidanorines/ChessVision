@@ -56,11 +56,11 @@ Each script's docstring explains it in more detail.
 |---|---|---|---|
 | 1 | `python scripts/calibrate.py` | live frame of the board in the **starting position**; you click a1, h1, h8, a8, then the tops of the kings on e1 and e8 | `calibration.json` (corners, foot point, lean) |
 | 2 | `python scripts/capture.py g01` (random game)<br>`python scripts/capture.py test01 --pgn pgn/test01.pgn` (real game) | live frames. The script shows the position to set up; a press of the Bluetooth remote saves the photo | `data/raw/<game>/0001.jpg ...` (raw 4K) + `labels.csv` (file, FEN) + `calibration.json` (the calibration this game was shot with; `build_dataset.py` and `recognize.py --eval` crop each game with its own, so recalibrating never breaks older data) |
-| 3 | `python scripts/build_dataset.py` | `data/raw/` | `data/crops/{train,val,test}/<class>/<game>_<photo>_<square>.jpg` (ImageFolder layout) + class counts |
-| 4 | `notebooks/train_colab.ipynb` on Colab (upload `crops.zip` and `train.py` to `MyDrive/chessvision/`) | `crops.zip` | `model.pt` (best validation epoch), `train_log.csv`, `training_curves.png`, `confusion_matrix.png`, `test_mistakes.png/.csv` |
-| 5 | `python scripts/recognize.py photo.jpg`<br>`python scripts/recognize.py --eval data/raw/test01 data/raw/test02` | a 4K frame, or labeled game folders | the FEN and the board as text; with `--eval`, whole-board accuracy with and without the king rule |
+| 3 | `python scripts/build_dataset.py`<br>then zip it: `python -c "import shutil; shutil.make_archive('outputs/crops', 'zip', 'data', 'crops')"` | `data/raw/` | `data/crops/{train,val,test}/<class>/<game>_<photo>_<square>.jpg` (ImageFolder layout) + class counts; `outputs/crops.zip` for Colab |
+| 4 | `notebooks/train_colab.ipynb` on Colab, T4 GPU (upload `outputs/crops.zip` and `scripts/train.py` to `MyDrive/chess_vision/`, then Run all). Download `model.pt` from `MyDrive/chess_vision/outputs/` into `outputs/` on the laptop | `crops.zip`, `train.py` | `model.pt` (best validation epoch; `recognize.py` and `demo.py` load it from `outputs/model.pt`), `train_log.csv`, `training_curves.png`, `confusion_matrix.png`, `test_mistakes.png/.csv` |
+| 5 | `python scripts/recognize.py photo.jpg`<br>`python scripts/recognize.py --eval data/raw/test01 data/raw/test02 data/raw/test03` | a 4K frame from the current camera position (uses the root `calibration.json`), or labeled game folders (each uses its own calibration) | the FEN and the board as text; with `--eval`, whole-board accuracy with and without the king rule |
 | 6 | `python scripts/analyze.py "<FEN>"` | FEN piece placement | best move + evaluation for each side |
-| 7 | `python scripts/demo.py`<br>`python scripts/demo.py --images data/raw/test02` (offline) | live camera, or a folder of saved frames | OpenCV window: live board on the left, analysis on the right |
+| 7 | `python scripts/demo.py`<br>`python scripts/demo.py --images data/raw/test02` (offline) | live camera, or a folder of saved frames (cropped with that folder's own `calibration.json`) | OpenCV window: live board on the left, analysis on the right |
 
 **Demo keys:**
 - `SPACE`: read the board and analyze it
@@ -75,6 +75,9 @@ Saved `live_*` games always go to the training split, so rebuilding the dataset 
 - **train:** 6 random-move games, g03–g08 (plus any `live_*`)
 - **val:** 2 random-move games, g01 and g02, drawn with seed 4337
 - **test:** 2 real games replayed from PGN. test01 is Byrne–Fischer 1956 (41 photos); test02 is Kasparov–Topalov 1999 (44 photos)
+- **test (added 2026-11-20):** test03, a 15-photo random game shot after the camera was moved and recalibrated, to check the model on the rebuilt setup. Every folder whose name starts with `test` goes to the test split
+
+The model in section 4 was trained before test03 and `data/raw/live_2026-11-20/` (8 demo corrections) existed. Rebuilding the dataset now adds test03 to test (training unchanged) and the live corrections to train (training changes). To rebuild the exact v1 training set, move `live_2026-11-20/` out of `data/raw/` first.
 
 **Training:**
 - Adam, learning rate 1e-4, batch size 64, 10 epochs, cross-entropy loss
@@ -104,7 +107,7 @@ The figures (`training_curves.png`, `confusion_matrix.png`, `test_mistakes.png`)
 
 ```
 chess_vision/
-├── calibration.json        camera calibration for the locked setup (corners, foot point, lean)
+├── calibration.json        current camera calibration (corners, foot point, lean); each data/raw/<game>/ keeps its own copy
 ├── notebooks/
 │   └── train_colab.ipynb   training + validation + test evaluation on Colab
 ├── pgn/                    the two real games used as the test set
