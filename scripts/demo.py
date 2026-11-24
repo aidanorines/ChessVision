@@ -20,6 +20,7 @@ an impossible board is still shown, with a warning asking for another press; cor
 Usage (from chess_vision/):
   python scripts/demo.py                                live camera (Iriun at 4K, after calibrate.py)
   python scripts/demo.py --images data/raw/test02       offline: each SPACE analyzes the next saved frame
+                                                        (cropped with data/raw/test02/calibration.json)
 Keys: SPACE = analyze   s = save correction   q / Esc = quit   mouse = correct squares (see above)
 """
 import argparse
@@ -185,7 +186,8 @@ def main():
     args = ap.parse_args()
 
     model, classes = load_model()
-    H, foot, lean = geo.load_calibration()
+    # saved frames are cropped with the calibration their game was shot with (camera may have moved since)
+    H, foot, lean = geo.load_calibration(geo.game_calibration_path(args.images) if args.images else geo.CALIB_PATH)
     boxes = geo.crop_boxes(foot, lean)
     files = sorted(args.images.glob("*.jpg")) if args.images else []
     if args.images and not files:
