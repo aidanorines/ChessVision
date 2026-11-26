@@ -37,6 +37,7 @@ CS4337 Computer Vision, Texas State University, Fall 2026. Type 1 (Implementatio
 - the phone streams to the laptop with **Iriun Webcam**. OpenCV camera index 2 (`CAMERA_INDEX` in `camera.py`). Set Iriun's *Video format* to **3840×2160**, or frames come out at 1080p and the scripts stop with an error
 
 **Software** (versions used):
+- Windows 11: `remote.py` uses the Windows hotkey API and `camera.py` opens the camera through Media Foundation (`cv2.CAP_MSMF`). Training, `build_dataset.py` and offline `--images` runs don't need the camera
 - Python 3.12
 - opencv-python 4.13, python-chess 1.11, numpy 2.4, Pillow 12.1, torch 2.11, torchvision 0.26
 - Stockfish 19: `winget install Stockfish.Stockfish`. `analyze.py` finds it on PATH or in the winget folder; `--engine PATH` overrides that
@@ -101,16 +102,24 @@ On the test games, which the model never saw during training or epoch selection:
 - Because of the steep camera angle, a piece's lean depends on its square, so a king seen from an unfamiliar angle looked like a bishop or queen to the model.
 - Every wrong photo had exactly one wrong square, so the one-king-per-color rule repairs all of them.
 
-The figures (`training_curves.png`, `confusion_matrix.png`, `test_mistakes.png`) are written to `outputs/` by the notebook.
+The notebook writes these figures to `outputs/`. Copies from the v1 run are in `results/`:
+
+![Training and validation loss and accuracy per epoch](results/training_curves.png)
+
+![Test-set confusion matrix](results/confusion_matrix.png)
+
+All 27 misread test squares: [results/test_mistakes.png](results/test_mistakes.png). Per-epoch numbers: [results/train_log.csv](results/train_log.csv).
 
 ## 5. Repo layout
 
 ```
 chess_vision/
 ├── calibration.json        current camera calibration (corners, foot point, lean); each data/raw/<game>/ keeps its own copy
+├── data/raw/<game>/labels.csv   label of every photo (file, FEN, moves); the photos themselves aren't published
 ├── notebooks/
 │   └── train_colab.ipynb   training + validation + test evaluation on Colab
 ├── pgn/                    the two real games used as the test set
+├── results/                figures and training log from the v1 run
 └── scripts/
     ├── camera.py           opens Iriun at 4K, checks the resolution
     ├── remote.py           Bluetooth shutter remote as a capture trigger (Windows hotkey)
@@ -128,7 +137,7 @@ chess_vision/
 
 **Not in git** (see `.gitignore`):
 - `data/raw/` photos: the raw 4K frames (625 MB), not published
-- `*.pt`: the 45 MB trained model
+- `*.pt`: the 45 MB trained model (download it from the release)
 - `outputs/`
 
 The notebook recreates the model from `crops.zip`.
