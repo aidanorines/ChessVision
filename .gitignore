@@ -1,5 +1,9 @@
 __pycache__/
-data/
+# data is too big for git; crops.zip is a GitHub Release asset. Only the labels are tracked.
+data/*
+!data/raw/
+data/raw/*/*
+!data/raw/*/labels.csv
 test_frame.jpg
 *.pt
 .env

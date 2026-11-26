@@ -124,12 +124,14 @@ chess_vision/
     └── demo.py             live OpenCV window with click-to-correct
 ```
 
+**Dataset:** the 25,920 labeled crops the model was trained and tested on (g01–g08, test01, test02) are `crops.zip` on the [v1-dataset release](https://github.com/aidanorines/ChessVision/releases/tag/v1-dataset). Unzip it into `data/` to get `data/crops/{train,val,test}/<class>/`. Every game's labels (photo file, FEN, moves) are in git as `data/raw/<game>/labels.csv`.
+
 **Not in git** (see `.gitignore`):
-- `data/`: about 1 GB in total. Raw 4K frames take 625 MB and the 25,920 crops take 384 MB
+- `data/raw/` photos: the raw 4K frames (625 MB), not published
 - `*.pt`: the 45 MB trained model
 - `outputs/`
 
-These are large or rebuildable. `build_dataset.py` recreates the crops from the raw frames, and the notebook recreates the model.
+The notebook recreates the model from `crops.zip`.
 
 ## 6. Limitations
 
