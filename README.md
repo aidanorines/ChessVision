@@ -124,7 +124,7 @@ chess_vision/
     └── demo.py             live OpenCV window with click-to-correct
 ```
 
-**Dataset:** the 25,920 labeled crops the model was trained and tested on (g01–g08, test01, test02) are `crops.zip` on the [v1-dataset release](https://github.com/aidanorines/ChessVision/releases/tag/v1-dataset). Unzip it into `data/` to get `data/crops/{train,val,test}/<class>/`. Every game's labels (photo file, FEN, moves) are in git as `data/raw/<game>/labels.csv`.
+**Dataset:** the 25,920 labeled crops the model was trained and tested on (g01–g08, test01, test02) are `crops.zip` on the [v1-dataset release](https://github.com/aidanorines/ChessVision/releases/tag/v1-dataset). Unzip it into `data/` to get `data/crops/{train,val,test}/<class>/`. Every game's labels (photo file, FEN, moves) are in git as `data/raw/<game>/labels.csv`. The trained v1 model is `model.pt` on the same release: put it in `outputs/`, where `recognize.py` and `demo.py` load it.
 
 **Not in git** (see `.gitignore`):
 - `data/raw/` photos: the raw 4K frames (625 MB), not published
